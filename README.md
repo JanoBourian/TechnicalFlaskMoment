@@ -11,3 +11,25 @@ flask\Scripts\activate.bat
 pip install black
 pip freeze > requirements.txt
 ```
+
+## Set for the first execution
+
+```bash
+set FLASK_APP=main.py
+set FLASK_DEBUG=1
+flask run
+```
+
+## Get help
+
+```bash
+flask --help
+```
+
+## Another options
+
+In this case we can use other flags as: --reload, --no-reload, --debugger and --no-debugger.
+
+```bash
+flask run --host 0.0.0.0
+```
