@@ -12,6 +12,8 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Request Hooks](#section5-2)
 - [Response Object](#section6)
     - [Response Attributes or methods](#section6-1)
+    - [Redirect and Abort](#section6-2)
+- [Templates](#section7)
 
 <div id="section1"></div>
 
@@ -67,6 +69,10 @@ flask
 from flask import Flask
 from flask import request
 from flask import current_app
+from flask import g
+from flask import make_response
+from flask import redirect
+from flask import abort
 ```
 
 <div id="section4"></div>
@@ -127,16 +133,48 @@ This is the object that contains all information sent by our client in the HTTP 
 
 ## Request Hooks
 
-```python
-```
+The hooks are functions that start in a specific moment in the request process. 
+
+- **before_request**: Occurs before each request
+- **before_first_request**: Occurs only in the first request, here we can put the database built.
+- **after_request**: After each request if no unhandled exception ocurred
+- **teardown_request**: Is a function to run after each request, even if unhandled exceptions ocurred.
 
 <div id="section6"></div>
 
 # Response Object
 
+Response object is the object that flask returns after a request or like a result of a request. 
+
 <div id="section6-1"></div>
 
 ## Response Attributes or methods
 
+- **status_code**: The numeric HTTP status code
+- **headers**: A dictionary object
+- **set_cookie()**: Adds a cookie to the response
+- **delete_cookie()**: jejeje
+- **content_length**: 
+- **content_type**: The media type of the response body
+- **set_data()**: Sets the response body as a string or bytes value
+- **get_data()**: Gets the response body
+
+<div id="section6-2"></div>
+
+## Redirect and Abort
+
 ```python
+from flask import redirect
+from flask import abort
+# a lot of code
+@app.route("/user/<user:int>")
+def index(user:int):
+    if (user == 0):
+        abort(404)
+    else:
+        redirect("https://wwww.google.com.mx")
 ```
+
+<div id="section7"></div>
+
+# Templates
