@@ -1,10 +1,10 @@
-from flask import Flask, request, g, make_response, redirect
+from flask import Flask, request, g, make_response, redirect, Response
 import logging 
 
 app = Flask(__name__)
 
 @app.route("/")
-def index() -> str:
+def index() -> Response:
     logging.warning(app.app_context())
     logging.warning(app.name)
     logging.warning(app.url_map)
@@ -21,7 +21,7 @@ def index() -> str:
     return response
 
 @app.route("/user/<name>")
-def user(name:str) -> str:
+def user(name:str) -> Response:
     logging.warning(app.app_context())
     logging.warning(app.name)
     logging.warning(app.url_map)
