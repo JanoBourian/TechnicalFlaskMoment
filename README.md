@@ -72,6 +72,7 @@ flask run --host 0.0.0.0
 black
 flask
 flask-bootstrap
+flask-moment
 ```
 
 <div id="section3"></div>
@@ -87,6 +88,7 @@ from flask import make_response
 from flask import redirect
 from flask import abort
 from flask import render_template
+from flask_moment import Moment
 ```
 
 <div id="section4"></div>
@@ -295,19 +297,98 @@ For this application I'm not going to install bootstrap directly from pip, I'm g
 
 ## Custom Error Pages
 
+The custom error pages are important because they respond a some different problems in the application. We can render a html page or we can do other process with the information, for example to save information if we find some error during the execution.
+
+```python
+@app.errorhandler(404)
+def page_not_found(e) -> Response:
+    return make_response({"message": f"{e}"}, 404)
+
+@app.errorhandler(500)
+def page_not_found(e) -> Response:
+    return make_response({"message": f"{e}"}, 500)
+```
+
 <div id="section7-4"></div>
 
 ## Links
+
+Links are so useful when we have a dynamic information to link in our templates, for example, if we have a card template for our clients and each client inside of card template has different links, we can add dynamic links.
+
+We have two types or urls: relatives and absolute. Relatives are in our context app, and absolutes are used for connect with external pages. 
+
+- links inside our application
+```python
+url_for("index") #our function called "index"
+```
+
+- dynamic links
+```python
+<ul>
+    {% for d in data %}
+        <li>
+            <a href="{{url_for('user', name=d.get('name', ''))}}">{{d.get("name", "")}}</a>
+        </li>
+    {% endfor %}
+</ul>
+```
 
 <div id="section7-5"></div>
 
 ## Static files
 
+We can allow automatically static files inside the directory called __static/__. At this moment is no too much necessary to work with static files. 
+
 <div id="section7-6"></div>
 
 ## Dates and times
 
+This is not a trivial problema because exists a lot of people request our page, and they could be around the world, for this reason is important to have a proper way to show dates and hours.
+
+We need to implement it correctly, and we need to write code in two moments in two different parts. First part is inside our __app.py__ file:
+
+```python
+from flask_moment import Moment
+from datetime import datetime
+moment = Moment(app)
+...
+    return render_template("index.html", data=data, datetime = datetime.utcnow())
+```
+
+in our __base.html__ for allow it in all project:
+```html
+{{ moment.include_moment()}}
+{{ moment.locale('es')}}
+```
+
+and the next place is in our __.html__ file:
+
+```html
+<footer class="text-center">
+    <p>The local date and time is {{moment(datetime).format('LLL')}}</p>
+    <p>That was {{moment(datetime).fromNow(refresh=True)}}</p>
+</footer>
+```
+
+Exist other commands for flask-moment:
+
+```js
+format()
+fromNow()
+fromTime()
+calendar()
+valueOf()
+unix()
+```
+
 <div id="section8"></div>
 
+# Web Forms
 
 <div id="section9"></div>
+
+# Databases
+
+<div id="section10"></div>
+
+# Email

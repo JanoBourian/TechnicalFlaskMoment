@@ -7,4 +7,16 @@
 
 {% block body %}
 {{macros.render_awesome_title("Hello World!")}}
+<ul>
+    {% for d in data %}
+        <li>
+            <a href="{{url_for('user', name=d.get('name', ''))}}">{{d.get("name", "")}}</a>
+        </li>
+    {% endfor %}
+</ul>
+
+<footer class="text-center">
+    <p>The local date and time is {{moment(datetime).format('LLL')}}</p>
+    <p>That was {{moment(datetime).fromNow(refresh=True)}}</p>
+</footer>
 {% endblock %}
