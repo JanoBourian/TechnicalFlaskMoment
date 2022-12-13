@@ -3,7 +3,8 @@ import logging
 
 app = Flask(__name__)
 
-@app.route("/", methods=['GET'])
+# @app.route("/", methods=['GET'])
+@app.get("/")
 def index() -> str:
     logging.warning(app.app_context())
     logging.warning(app.name)

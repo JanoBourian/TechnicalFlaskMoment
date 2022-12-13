@@ -71,6 +71,7 @@ flask run --host 0.0.0.0
 ```bash
 black
 flask
+flask-bootstrap
 ```
 
 <div id="section3"></div>
@@ -240,28 +241,55 @@ You can remind that we have some statements for control flux as conditionals and
 ```
 
 #### Macro 
+
+Macros are similar to python functions, but inside of html code. We can put the macros inside a html file named __macros.html__
 ```python
+{% macro render_comment(comment) %}
+    <li>{{comment}}</li>
+{% endmacro %}
+```
+
+```python
+<ul>
+    {% for comment in comments %}
+        {{render_comment(comment)}}
+    {% endfor %}
+</ul>
 ```
 
 #### import statement
+Import includes in current file the information contents in some other file.
 ```python
-```
-
-#### include statement
-```python
+{% import 'macros.html' as macros %}
 ```
 
 #### extend statement
+Is a common way to reuse the templates structure for example the headers, navigation bar, footer or another common information inside the  several templates.
 ```python
+{% include 'base.html' %}
+```
+#### include statement
+```python
+{% include "navbar.html" %}
 ```
 
+#### differences between statements
+
+import -> macro
+extends -> base.html
+include -> navbar.html
+
 #### block statement
-```python
+```html
+{% block body %}
+{% endblock %}
 ```
 
 <div id="section7-2"></div>
 
 ## Bootstrap Integration
+
+For this application I'm not going to install bootstrap directly from pip, I'm gonna use Bootstrap from the html integration. For more information please check the last version for Bootstrap: https://getbootstrap.com/docs/5.0/getting-started/introduction/
 
 <div id="section7-3"></div>
 

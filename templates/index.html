@@ -1,1 +1,10 @@
-<h1> Hello World! </h1>
+{% extends 'base.html' %}
+{% import 'macros.html' as macros %}
+
+{% block title %}
+    Index | janobourian
+{% endblock %}
+
+{% block body %}
+{{macros.render_awesome_title("Hello World!")}}
+{% endblock %}
