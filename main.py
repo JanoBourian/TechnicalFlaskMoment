@@ -1,10 +1,10 @@
-from flask import Flask, request, g, make_response, redirect, Response
+from flask import Flask, request, g, make_response, redirect, Response, render_template
 import logging 
 
 app = Flask(__name__)
 
-@app.route("/")
-def index() -> Response:
+@app.route("/", methods=['GET'])
+def index() -> str:
     logging.warning(app.app_context())
     logging.warning(app.name)
     logging.warning(app.url_map)
@@ -18,10 +18,10 @@ def index() -> Response:
     response = make_response("<h1> Hello, Flask! Your User-Agent is: {}</h1>".format(user_agent))
     response.set_cookie('answer', '42')
     response.status_code = 200
-    return response
+    return render_template("index.html")
 
-@app.route("/user/<name>")
-def user(name:str) -> Response:
+@app.route("/user/<name>", methods=['GET'])
+def user(name:str) -> str:
     logging.warning(app.app_context())
     logging.warning(app.name)
     logging.warning(app.url_map)
@@ -35,5 +35,5 @@ def user(name:str) -> Response:
     response = make_response("<h1> Hello, {}! Your User-Agent is: {}</h1>".format(name, user_agent))
     response.set_cookie(name, '42')
     response.status_code = 200
-    return response
-
+    data = {"name": name}
+    return render_template("user.html", data = data)

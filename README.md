@@ -14,6 +14,18 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Response Attributes or methods](#section6-1)
     - [Redirect and Abort](#section6-2)
 - [Templates](#section7)
+    - [Jinja Template](#section7-1)
+        - [Filters](#section7-1-1)
+        - [Control Structures](#section7-1-2)
+    - [Bootstrap Integration](#section7-2)
+    - [Custom Error Pages](#section7-3)
+    - [Links](#section7-4)
+    - [Static Files](#section7-5)
+    - [Dates and times](#section7-6)
+- [Web Forms](#section8)
+- [Databases](#section9)
+- [Email](#section10)
+- [Large Application Structure](#section11)
 
 <div id="section1"></div>
 
@@ -73,6 +85,7 @@ from flask import g
 from flask import make_response
 from flask import redirect
 from flask import abort
+from flask import render_template
 ```
 
 <div id="section4"></div>
@@ -178,3 +191,95 @@ def index(user:int):
 <div id="section7"></div>
 
 # Templates
+
+The process where Flask replaces the variables with actual values and returns a final response string is called __rendering__
+
+<div id="section7-1"></div>
+
+## Jinja Template
+
+The directory for our templates is called templates, inside that template we can put the html code. If you need more information about Jinja2 Templates please visit https://jinja.palletsprojects.com/en/3.1.x/
+
+- render_template
+- variable: {{name}}
+
+<div id="section7-1-1"></div>
+
+### Filters
+
+- safe: Renders the value without applying escaping
+- striptags: Removes any HTML tags from the value before rendering
+- capitalize: 
+- lower:
+- upper:
+- title:
+- trim:
+
+<div id="section7-1-2"></div>
+
+### Control Structure
+
+You can remind that we have some statements for control flux as conditionals and loops. Below you can see twice examples.
+
+#### If statement
+```python
+{% if user%}
+    Hello {{user}}!
+{% else %}
+    Hello stranger!
+{% endif %}
+```
+
+#### For statement
+```python
+<ul>
+    {% for comment in comments %}
+        <li> {{comment}} </li>
+    {% endfor %}
+</ul>
+```
+
+#### Macro 
+```python
+```
+
+#### import statement
+```python
+```
+
+#### include statement
+```python
+```
+
+#### extend statement
+```python
+```
+
+#### block statement
+```python
+```
+
+<div id="section7-2"></div>
+
+## Bootstrap Integration
+
+<div id="section7-3"></div>
+
+## Custom Error Pages
+
+<div id="section7-4"></div>
+
+## Links
+
+<div id="section7-5"></div>
+
+## Static files
+
+<div id="section7-6"></div>
+
+## Dates and times
+
+<div id="section8"></div>
+
+
+<div id="section9"></div>
