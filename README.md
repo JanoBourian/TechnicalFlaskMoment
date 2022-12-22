@@ -23,7 +23,24 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Static Files](#section7-5)
     - [Dates and times](#section7-6)
 - [Web Forms](#section8)
+    - [Configuration](#section8-1)
+    - [Form Classes](#section8-2)
+    - [HTML Rendering of Forms](#section8-3)
+    - [Form Handling in View Functions](#section8-4)
+    - [Redirects and User Sessions](#section8-5)
+    - [Message Flashing](#section8-6)
 - [Databases](#section9)
+    - [SQL Databases](#section9-1)
+    - [NoSQL Databases](#section9-2)
+    - [SQL or NoSQL?](#section9-3)
+    - [Python Database Frameworks](#section9-4)
+    - [Database Management With Flask-SQLAlchemy](#section9-5)
+    - [Model definition](#section9-6)
+    - [Relationships](#section9-7)
+    - [Database Operations](#section9-8)
+    - [Database Use in VIew Functions](#section9-9)
+    - [Integration with the Python Shell](#section9-10)
+    - [Database Migrations with Flask-Migrate](#section9-11)
 - [Email](#section10)
 - [Large Application Structure](#section11)
 
@@ -73,6 +90,8 @@ black
 flask
 flask-bootstrap
 flask-moment
+flask-wtf
+python-dotenv
 ```
 
 <div id="section3"></div>
@@ -89,6 +108,9 @@ from flask import redirect
 from flask import abort
 from flask import render_template
 from flask_moment import Moment
+from flask import url_for
+from flask import session
+from flask import flash
 ```
 
 <div id="section4"></div>
@@ -385,9 +407,239 @@ unix()
 
 # Web Forms
 
+We can start to work with forms through flask request package but is too much interesting and necessary work with __flask-wtf__ 
+
+<div id="section8-1"></div>
+
+## Configuration
+
+Before all we need to set a __SECRET_KEY__ value that will be used as an encryption. 
+
+<div id="section8-2"></div>
+
+## Form Classes
+
+The basic code for a WebForm in Python (using FlaskForm)
+
+```python
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+class NameForm(FlaskForm):
+    name = StringField("What is your name?", validators=[DataRequired()])
+    submit = SubmitField("Submit")
+```
+
+Field types (a long list)
+
+- **BooleanField**: Checkbox with True and False values
+- **DateField**: Text Field that accepts a datetime.date value in a given format
+- **DateTimeField**: Text Field that accepts a datetime.datime value in a given format
+- **DecimalField**: Text field that accepts a decimal.Decimal value
+- **FileField**: File upload field
+- **HiddenField**: Hidden text field
+- **MultiplFileField**: Multiple file upload field
+- **FieldList**: List of fields of a given type
+- **FloatField**: Text field that accepts a floating-point value
+- **FormField**: Form embedded as a field in a container form
+- **IntegerField**: Text Field that accepts an integer value
+- **PasswordField**: Password text field
+- **RadioField**: List of radio buttons
+- **SelectField**: Drop-down list of choices
+- **SelecMultipleFields**: Drop-down list of choices with multiple selections
+- **SubmitField**: Form submissions button
+- **StringField**: Text field
+- **TextAreaField**: Multiple-line text field 
+
+WTForm validators
+
+- **DataRequired**: Validates that the field contains data after type conversion
+- **Email**: Validates an email address
+- **EqualTo**: Compares the values of two fields; useful when requesting a password to be entered twice for confirmation
+- **InputRequired**: Validates that the field contains data before type conversion
+- **IPAdress**: Validates an IPv4 network address
+- **Length**: Validates the length of the string entered
+- **MacAdress**: Validate a MAC address
+- **NumberRange**: Validates that the value entered is within a numeric range
+- **Optional**: Allows ampty input field, skippingg additional validators
+- **Regexp**: Validates the input agaisnt a regular expression
+- **URL**: Validates a URL
+- **UUID**: Validates a UUID
+- **AnyOf**: Validates that the input is one of a list of possible values
+- **NoneOf**: Validates that the input is none of a list of possible values
+
+<div id="section8-3"></div>
+
+## HTML Rendering of Forms
+
+The most basic way to call a form into HTML code:
+
+```html
+<form method="POST">
+    {{form.hidden_tag()}}
+    {{form.name.label}} {{form.name(class="center")}}
+    {{form.submit()}}
+</form>
+```
+
+__{{form.hidden_tag()}}__ provides extra protection against CSRF attacks.
+
+<div id="section8-4"></div>
+
+## Form Handling in View Functions
+
+HTML code:
+
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+Form | Form
+{% endblock %}
+
+{% block body %}
+
+{% if name %}
+    <h1 class = "text-center mt-2"> {{name}} </h1>
+{% endif %}
+
+<!--
+    <h1 class="text-center mt-2"> There is a Form </h1>
+    {% if name%}
+        <h1 class = "text-center mt-2"> {{name}} </h1>
+    {% else %}
+        <h1 class = "text-center mt-2"> Stranger! </h1>
+    {% endif %}
+-->
+
+    <form method="POST" class="text-center mt-4">
+        {{form.hidden_tag()}}
+        <div class="mb-3">
+            <div class="form-label">
+                {{form.name.label}}
+            </div>
+            <div class = "d-flex justify-content-center">
+                <div class="col-sm-4">
+                    {{form.name(class="form-control form-control-md", placeholder="Your name here")}}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+
+        </div>
+        {{form.submit(class="btn btn-primary")}}
+    </form>
+{% endblock %}
+```
+
+Python Code:
+```python
+@app.route("/form", methods=["GET", "POST"])
+def user_form():
+    name = None
+    form = NameForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        form.name.data = ""
+    return render_template("form.html", form=form, name=name)
+```
+<div id="section8-5"></div>
+
+## Redirects and User Sessions
+
+Browsers repeat the last request they sent when they are asked to refresh a page. At this point we have two problems: we need to implement something for avoid to send a POST method in a refresh and the second one is to keep the information about our user. 
+
+The last version of __main.py__ is:
+
+```python
+@app.route("/form", methods=["GET", "POST"])
+def user_form():
+    form = NameForm()
+    if form.validate_on_submit():
+        session["name"] = form.name.data
+        form.name.data = ""
+        return redirect(url_for("index"))
+    return render_template("form.html", form=form, name=session.get("name", ""))
+```
+
+<div id="section8-6"></div>
+
+## Message Flashing
+
+Now, this is the last version:
+
+```python
+@app.route("/form", methods=["GET", "POST"])
+def user_form():
+    form = NameForm()
+    if form.validate_on_submit():
+        old_name = session.get("name", "")
+        if old_name is not None and old_name != form.name.data:
+            flash("Looks like you have changed your name!")
+        session["name"] = form.name.data
+        form.name.data = ""
+        return redirect(url_for("index"))
+    return render_template("form.html", form=form, name=session.get("name", ""))
+```
+
+New HTML version (in base.html):
+```html
+
+```
+
 <div id="section9"></div>
 
 # Databases
+
+<div id="section9-1"></div>
+
+## SQL Databases
+
+<div id="section9-2"></div>
+
+## NoSQL Databases
+
+<div id="section9-3"></div>
+
+## SQL or NoSQL?
+
+<div id="section9-4"></div>
+
+## Python Database Frameworks
+
+<div id="section9-5"></div>
+
+## Database Management with Flask-SQLAlchemy
+
+
+<div id="section9-6"></div>
+
+## Model Definition
+
+
+<div id="section9-7"></div>
+
+## Relationship
+
+<div id="section9-8"></div>
+
+## Database operations
+
+<div id="section9-9"></div>
+
+## Database Use in View Functions
+
+<div id="section9-10"></div>
+
+## Integration with the Python Shell
+
+
+<div id="section9-11"></div>
+
+## Database Migrations with Flask-Migrate
+
+
 
 <div id="section10"></div>
 
