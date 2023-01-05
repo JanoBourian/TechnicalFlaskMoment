@@ -90,6 +90,7 @@ black
 flask
 flask-bootstrap
 flask-moment
+flask-sqlalchemy
 flask-wtf
 python-dotenv
 ```
@@ -111,6 +112,7 @@ from flask_moment import Moment
 from flask import url_for
 from flask import session
 from flask import flash
+from flask_sqlalchemy import SQLAlchemy
 ```
 
 <div id="section4"></div>
@@ -592,31 +594,91 @@ New HTML version (in base.html):
 
 # Databases
 
+We have two alternatives to develop a store system: SQL or NoSQL databases.
+
 <div id="section9-1"></div>
 
 ## SQL Databases
+
+For us is important rember that exist two important columns: **primary_key** and **foreign_key**. The first is to have a unique identifier inside the table and the second is to have a relationships between tables. 
 
 <div id="section9-2"></div>
 
 ## NoSQL Databases
 
+This databases use collections instead of tables and documents instead of records. 
+
 <div id="section9-3"></div>
 
 ## SQL or NoSQL?
+
+For SQL databases exist an ACID paradigm: Atomicity, Consistency, Isolation and Durability. 
 
 <div id="section9-4"></div>
 
 ## Python Database Frameworks
 
+Exists a lot of database engines to work with Flask: **MySQL**, **PostgreSQL**, **SQLite**, **Redis**, **MongoDB**, **CouchDB**, **DynamoDB**
+
+Factors to evaluate when choose one or another database framework:
+
+- Ease of use
+- Performance
+- Portability
+- Flask integration
+
 <div id="section9-5"></div>
 
 ## Database Management with Flask-SQLAlchemy
 
+Flask-SQLAlchemy most popular database engines:
+
+- MySQL: mysql://username:password@hostname/database
+- Postrges: postgresql://username:password@hostname/database
+- SQLite(Linux, macOS): sqlite:////absolute/path/to/database
+- SQLite(Windows): sqlite:///c:/absolute/path/to/database
+
+Specific configuration:
+
+```python
+from flask_sqlalchemy import SQLAlchemy
+app = Flask(__name__)
+app.config.update(**CONFIGURATION)
+moment = Moment(app)
+db = SQLAlchemy(app)
+```
 
 <div id="section9-6"></div>
 
 ## Model Definition
 
+Type name and Python type relationship:
+
+- Integer: int
+- SmallInteger: int
+- BigInteger: int OR long
+- Float: float
+- Numeric: decimal.Decimal
+- String: str
+- Text: str
+- Unicode: unicode
+- UnicodeText: unicode
+- Booleans: bool
+- Date: datetime.date
+- Time: datetime.time
+- DateTime: datetime.datetime
+- Interval: datetime.timedelta
+- Enum: str
+- PickleType: Any Python object
+- LargeBinary: str
+
+Specific configuration inside to configuration:
+
+- primary_key
+- unique
+- index
+- nullable
+- default
 
 <div id="section9-7"></div>
 

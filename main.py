@@ -1,14 +1,32 @@
 from flask import Flask, request, g, make_response, redirect, Response, render_template, url_for, session, flash
 from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import logging
-from configuration_info import SECRET_KEY
+from configuration_info import CONFIGURATION
 from custom_forms import NameForm 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = SECRET_KEY
-
+app.config.update(**CONFIGURATION)
 moment = Moment(app)
+db = SQLAlchemy(app)
+
+## Models
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(64), unique = True)
+    
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = db.Columns(db.Integer, primary_key = True)
+    username = db.Column(db.String(64), unique = True, index = True)
+    
+    def __repr__(self):
+        return f"<User {self.username}>"
 
 # @app.route("/", methods=['GET'])
 @app.get("/")
