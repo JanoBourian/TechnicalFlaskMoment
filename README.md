@@ -684,6 +684,40 @@ Specific configuration inside to configuration:
 
 ## Relationship
 
+In this example I show you a one-to-many relationship and how it is implemented:
+
+```python
+class Role(db.Model):
+    __tablename__ = 'roles'
+
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(64), unique = True)
+    users = db.relationship('User', backref="role")
+    
+    def __repr__(self):
+        return f"<Role {self.name}>"
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Columns(db.Integer, primary_key = True)
+    username = db.Column(db.String(64), unique = True, index = True)
+    role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    
+    def __repr__(self):
+        return f"<User {self.username}>"
+```
+
+For a relationship configuration we can use:
+
+- backref: Add a back reference in the other model in the relationship
+- primaryjoin: Specify the join condition between the two models explicitly. This is necessary only for ambiguous relationships.
+- lazy: Specify how the related items are to be loaded. 
+- uselist: If set to False, use a scalar instead of a list.
+- order_by: Specify the ordering used for the items in the relationship
+- secondary: Specify the name of the association table to use in many-to-many relationships.
+- secondaryjoin: Specify the secondary join conditions for many-to-many relationships when SQLAlchemy cannot determine it on its own.
+
 <div id="section9-8"></div>
 
 ## Database operations
