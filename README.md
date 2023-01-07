@@ -722,6 +722,81 @@ For a relationship configuration we can use:
 
 ## Database operations
 
+For this section we can create tables using flask console. In root path we can type:
+
+```cmd
+flask shell 
+from main import db
+dir(db)
+db.create_all()
+db.drop_all()
+```
+### Inserting Information
+
+```cmd
+from main import Role, User
+dir(Role)
+admin = Role(name="admin")
+user = Role(name="user")
+user_john = User(username="user_john", role=user)
+user_susan = User(username="susan", role=admin)
+db.session.add(admin)
+db.session.add(user)
+db.session.add(user_john)
+db.session.add(user_susan)
+db.session.commit()
+```
+
+And now is available the user.id because that already exist in database.
+
+If you need to check more information you can type, for example: dir(db.session) or dir(db.session.rollback)
+
+### Modifying rows
+
+```cmd
+admin.name = "administrator"
+db.session.add(admin)
+db.session.commit()
+```
+
+### Deleting rows
+
+```cmd
+db.session.delete(admin)
+db.session.commit()
+```
+
+### Querying rows
+
+```cmd
+dir(Role)
+Role.query.all()
+User.query.all()
+dir(User.query)
+User.query.filter_by(role=admin).all()
+str(User.query.filter_by(role=admin))
+User.query.filter_by(role=admin).first()
+```
+
+### Common SQLAlchemy filters
+
+- filter():
+- filter_by():
+- limit():
+- offset():
+- order_by():
+- gropu_by():
+
+### Most common SQLAlchemy query executors
+
+- all():
+- first():
+- first_or_404():
+- get():
+- get_or_404():
+- count():
+- paginate():
+
 <div id="section9-9"></div>
 
 ## Database Use in View Functions
