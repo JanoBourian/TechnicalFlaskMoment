@@ -12,6 +12,7 @@ from flask import (
 )
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from datetime import datetime
 import logging
 from configuration_info import CONFIGURATION
@@ -21,6 +22,7 @@ app = Flask(__name__)
 app.config.update(**CONFIGURATION)
 moment = Moment(app)
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 ## Models
 class Role(db.Model):

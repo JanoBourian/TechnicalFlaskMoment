@@ -93,6 +93,7 @@ flask-moment
 flask-sqlalchemy
 flask-wtf
 python-dotenv
+flask-migrate
 ```
 
 <div id="section3"></div>
@@ -844,7 +845,28 @@ Role
 
 ## Database Migrations with Flask-Migrate
 
+We can use Database Migrations instead of to delete and create databases again. 
 
+```python
+from flask_migrate import Migrate
+## 
+migrate = Migrate(app, db)
+##
+```
+
+And now, we can go to the console to see other configurations. Before make some changes is necessary review the next steps:
+
+- Make the necessary changes to the model classes
+- Create an automatic migration script with the flask db migrate command
+- Review the generated script and adjust it so that it accurately represents the changes that were made to the models
+- Add the migration script to source control
+- Apply the migration to the database with the flaks db upgrade command
+
+```cmd
+flask db init
+flask db migrate -m "Inital migration"
+flask db upgrade
+```
 
 <div id="section10"></div>
 
