@@ -801,10 +801,44 @@ User.query.filter_by(role=admin).first()
 
 ## Database Use in View Functions
 
+```python
+@app.route("/form", methods=["GET", "POST"])
+def user_form():
+    form = NameForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.name.data).first()
+        if user is None:
+            user = User(username=form.name.data)
+            db.session.add(user)
+            db.session.commit()
+            session["known"] = False
+        else:
+            session["known"] = True
+        session["name"] = form.name.data
+        form.name.data = ""
+        return redirect(url_for("index"))
+    return render_template("form.html", form=form, name=session.get("name", ""), known = session.get("known",""))
+```
+
 <div id="section9-10"></div>
 
 ## Integration with the Python Shell
 
+If you write the next lines, you can get:
+
+```python
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, User=User, Role=Role)
+```
+
+```cmd
+flask shell
+app
+db
+User
+Role
+```
 
 <div id="section9-11"></div>
 
