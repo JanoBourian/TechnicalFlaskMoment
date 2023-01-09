@@ -43,6 +43,18 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Database Migrations with Flask-Migrate](#section9-11)
 - [Email](#section10)
 - [Large Application Structure](#section11)
+- [User Authentication](#section12)
+- [User Roles](#section13)
+- [User Profiles](#section14)
+- [Blog Posts](#section15)
+- [Followers](#section16)
+- [User Comments](#section17)
+- [Application Programming Interfaces](#section18)
+- [Testing](#section19)
+- [Performance](#section20)
+- [Deployment](#section21)
+- [Additional resources](#section22)
+
 
 <div id="section1"></div>
 
@@ -93,6 +105,7 @@ flask-moment
 flask-sqlalchemy
 flask-wtf
 python-dotenv
+flask-migrate
 ```
 
 <div id="section3"></div>
@@ -844,7 +857,28 @@ Role
 
 ## Database Migrations with Flask-Migrate
 
+We can use Database Migrations instead of to delete and create databases again. 
 
+```python
+from flask_migrate import Migrate
+## 
+migrate = Migrate(app, db)
+##
+```
+
+And now, we can go to the console to see other configurations. Before make some changes is necessary review the next steps:
+
+- Make the necessary changes to the model classes
+- Create an automatic migration script with the flask db migrate command
+- Review the generated script and adjust it so that it accurately represents the changes that were made to the models
+- Add the migration script to source control
+- Apply the migration to the database with the flaks db upgrade command
+
+```cmd
+flask db init
+flask db migrate -m "Inital migration"
+flask db upgrade
+```
 
 <div id="section10"></div>
 

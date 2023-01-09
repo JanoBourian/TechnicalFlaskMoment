@@ -2,3 +2,4 @@ flask/
 __pycache__
 configuration_info.py
 *.sqlite
+migrations/
