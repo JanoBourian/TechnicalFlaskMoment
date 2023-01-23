@@ -42,6 +42,10 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Integration with the Python Shell](#section9-10)
     - [Database Migrations with Flask-Migrate](#section9-11)
 - [Email](#section10)
+    - [Email Support with Flask-Mail](#section10-1)
+    - [Sending Email from the Python Shell](#section10-2)
+    - [Integration Emails with the Application](#section10-3)
+    - [Sending Asyncronous Email](#section10-4)
 - [Large Application Structure](#section11)
 - [User Authentication](#section12)
 - [User Roles](#section13)
@@ -106,6 +110,7 @@ flask-sqlalchemy
 flask-wtf
 python-dotenv
 flask-migrate
+flask-mail
 ```
 
 <div id="section3"></div>
@@ -126,6 +131,8 @@ from flask import url_for
 from flask import session
 from flask import flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail
+from flask_mail import Message
 ```
 
 <div id="section4"></div>
@@ -883,3 +890,98 @@ flask db upgrade
 <div id="section10"></div>
 
 # Email
+
+Is a simple way to notify.
+
+<div id="section10-1"></div>
+
+## Email Suuport with Flask-Mail
+
+```cmd
+pip install flask-mail
+```
+
+Configuration keys:
+- MAIL_SERVER (localhost): Hostname or IP address of the email server
+- MAIL_PORT (25): Port of the email server
+- MAIL_USER_TLS (False): Enable Transport Layer Security (TLS) security
+- MAIL_USE_SSL (False): Enable Secure Sockets Layer (SSL) security
+- MAIL_USERNAME (None): Mail account username
+- MAIL_PASSWORD (None): Mail account password
+
+```python
+from flask_mail import Mail
+...
+mail = Mail(app)
+```
+
+<div id="section10-2"></div>
+
+## Sending Email from the Python Shell
+
+```shell
+from flask_mail import Message
+from main import mail
+msg = Message("Test mail", sender="sender@sender.mx",recipients=["recipients@recipients.com"])
+msg.body = "This is the plan text body"
+msg.html = "This is the <b> HTML </b> body"
+with app.app_context():
+    mail.send(msg)
+```
+
+<div id="section10-3"></div>
+
+## Integrating Email with the Application
+
+```python
+## Mail send()
+def send_email(to, subject, template, **kwargs):
+    msg = Message(
+        CONFIGURATION.get("FLASKY_MAIL_SUBJECT_PREFIX")+ subject,
+        sender = CONFIGURATION.get("FLASKY_MAIL_SENDER"),
+        recipients = [to]
+        )
+    msg.body = render_template(template+'.txt', **kwargs)
+    msg.html = render_template(template+'.html', **kwargs)
+    mail.send(msg)
+
+...
+
+            if app.config["FLASKY_ADMIN"]:
+                send_email(app.config["FLASKY_ADMIN"],
+                           "New User",
+                           "mail/new_user",
+                           user = user
+                           )
+```
+
+<div id="section10-4"></div>
+
+## Sending Asynchonous Email
+
+```python
+## Mail send()
+def send_async_email(app, msg):
+    with app.app_context():
+        mail.send(msg)
+        
+def send_email(to, subject, template, **kwargs):
+    msg = Message(
+        CONFIGURATION.get("FLASKY_MAIL_SUBJECT_PREFIX")+ subject,
+        sender = CONFIGURATION.get("FLASKY_MAIL_SENDER"),
+        recipients = [to]
+        )
+    msg.body = render_template(template+'.txt', **kwargs)
+    msg.html = render_template(template+'.html', **kwargs)
+    thr = Thread(target=send_async_email, args=[app, msg])
+    thr.start()
+    return thr
+```
+
+<div id="section11"></div>
+
+# Large Application Structure
+
+<div id="section12"></div>
+
+# User Authentication
