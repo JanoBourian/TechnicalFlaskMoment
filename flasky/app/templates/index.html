@@ -6,7 +6,10 @@
 {% endblock %}
 
 {% block body %}
-{{macros.render_awesome_title("Hello World!")}}
+<!-- 
+{{macros.render_awesome_title("Welcome to the next software system!")}}
+-->
+<!--
 <ul>
     {% for d in data %}
         <li>
@@ -14,13 +17,13 @@
         </li>
     {% endfor %}
 </ul>
+-->
 
 <h1>
-    Hello 
     {%if name %}
-        {{name}}!
+        {{macros.render_awesome_title(name)}} 
     {% else %}
-        Stranger!
+        {{macros.render_awesome_title("Stranger")}}
     {% endif %}
 </h1>
 

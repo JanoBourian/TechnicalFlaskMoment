@@ -8,14 +8,14 @@ from ..models import User
 # @main.route("/", methods=['GET'])
 @main.get("/")
 def index() -> str:
-    user_agent = request.headers.get("User-Agent")
-    response = make_response(
-        "<h1> Hello, Flask! Your User-Agent is: {}</h1>".format(user_agent)
-    )
-    response.set_cookie("answer", "42")
-    response.status_code = 200
-    data = [{"name": "janobourian"}, {"name": "peter"}, {"name": "sysadmin"}]
-    return render_template("index.html", data=data, datetime=datetime.utcnow())
+    # user_agent = request.headers.get("User-Agent")
+    # response = make_response(
+    #     "<h1> Hello, Flask! Your User-Agent is: {}</h1>".format(user_agent)
+    # )
+    # response.set_cookie("answer", "42")
+    # response.status_code = 200
+    # data = [{"name": "janobourian"}, {"name": "peter"}, {"name": "sysadmin"}]
+    return render_template("index.html", name=session.get("name", ""), datetime=datetime.utcnow())
 
 
 @main.route("/user/<name>", methods=["GET"])
