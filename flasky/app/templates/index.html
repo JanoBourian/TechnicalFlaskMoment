@@ -10,7 +10,7 @@
 <ul>
     {% for d in data %}
         <li>
-            <a href="{{url_for('user', name=d.get('name', ''))}}">{{d.get("name", "")}}</a>
+            <a href="{{url_for('.user', name=d.get('name', ''))}}">{{d.get("name", "")}}</a>
         </li>
     {% endfor %}
 </ul>

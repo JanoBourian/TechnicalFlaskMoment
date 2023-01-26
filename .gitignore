@@ -1,6 +1,8 @@
-flask/
 __pycache__
-configuration_info.py
+venv/
 *.sqlite
 migrations/
 .vscode/
+*.env
+.env
+*.flaskenv

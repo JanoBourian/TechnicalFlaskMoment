@@ -991,25 +991,146 @@ def send_email(to, subject, template, **kwargs):
 
 # Large Application Structure
 
+The structure suggested is showed below:
+
+* flasky/
+    * app/
+        * templates/
+        * static/
+        * main/
+            * \_\_init\_\_.py
+            * errors.py
+            * forms.py
+            * views.py
+        * \_\_init\_\_.py
+        * email.py
+        * models.py
+        * migrations/
+        * tests/
+            * \_\_init\_\_.py
+            * test*.py
+* venv/
+* requirements.txt
+* config.py
+* flasky.py
+
 <div id="section11-1"></div>
 
 ## Configuration options
+
+Below is the **configuration.py** script:
+
+```python
+import os
+from dotenv import load_dotenv
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+load_dotenv()  # take environment variables from .env.
+
+class Config:
+    SECRET_KEY = os.environ.get("SECRET_KEY") 
+    MAIL_SERVER = os.environ.get('MAIL_SERVER') 
+    MAIL_PORT = int(os.environ.get("MAIL_PORT")) 
+    MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() 
+    MAIL_USERNAME = os.environ.get("MAIL_USERNAME") 
+    MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD") 
+    FLASKY_MAIL_SUBJECT_PREFIX =os.environ.get("FLASKY_MAIL_SUBJECT_PREFIX")  
+    FLASKY_MAIL_SENDER = os.environ.get("FLASKY_MAIL_SENDER") 
+    FLASKY_ADMIN = os.environ.get("FLASKY_ADMIN") 
+    SQLALCHEMY_TRACK_MODIFICATION = os.environ.get("SQLALCHEMY_TRACK_MODIFICATION") 
+    
+    @staticmethod
+    def init_app(app):
+        pass
+
+class DevelopmentConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DEV_DATABASE_URI")
+
+class TestingConfig(Config):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URI")
+
+class IntegrationConfig(Config):
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = os.environ.get("INT_DATABASE_URI")
+
+class ProductionConfig(Config):
+    SQLALCHEMY_DATABASE_URI = os.environ.get("PROD_DATABASE_URI")
+
+config = {
+    "development": DevelopmentConfig,
+    "testing": TestingConfig,
+    "integration": IntegrationConfig,
+    "production": ProductionConfig,
+    
+    "default": DevelopmentConfig
+}
+```
 
 <div id="section11-2"></div>
 
 ## Application packages
 
+Is where the code, templates, and static files lives. Usually is called **app**
+
 <div id="section11-3"></div>
 
 ### Using an application factory
+
+The factory constructor will be inside the app, in */flasky/app/\_\_init\_\_.py*
+
+```python
+from flask import Flask, render_template
+from flask_mail import Mail
+from flask_moment import Moment
+from flask_sqlalchemy import SQLAlchemy
+from config import config
+
+mail = Mail()
+moment = Moment()
+db = SQLAlchemy()
+
+def create_app(config_name:str) -> Flask:
+    app = Flask(__name__)
+    app.config.from_object(config_name)
+    
+    ## Start the app
+    config[config_name].init_app(app)
+    
+    mail.init_app(app)
+    moment.init_app(app)
+    db.init_app(app)
+    
+    ## Attach routes and custom error pages here
+    
+    return app
+```
 
 <div id="section11-4"></div>
 
 ### Implementing application functionality in a Blueprint
 
+This imply several configurations, but in little words is about the *main/* file configuration.
+
 <div id="section11-5"></div>
 
 ## Application Script
+
+```python
+import os
+from app import create_app, db
+from app.models import User, Role
+from flask_migrate import Migrate
+
+app = create_app(os.environ.get("FLASK_CONFIGURATION"))
+migrate = Migrate(app, db)
+
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, User=User, Role=Role)
+```
 
 <div id="section11-6"></div>
 
