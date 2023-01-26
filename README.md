@@ -1136,6 +1136,10 @@ def make_shell_context():
 
 ## Requirements File
 
+```cmd
+pip install -r requirements.txt
+```
+
 <div id="section11-7"></div>
 
 ## Unit Test
