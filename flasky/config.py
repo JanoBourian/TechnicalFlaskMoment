@@ -7,6 +7,7 @@ load_dotenv()  # take environment variables from .env.
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY") 
+    REMEMBER_COOKIE_DURATION = os.environ.get("REMEMBER_COOKIE_DURATION")
     MAIL_SERVER = os.environ.get('MAIL_SERVER') 
     MAIL_PORT = int(os.environ.get("MAIL_PORT")) 
     MAIL_USE_TLS = os.environ.get("MAIL_USE_TLS", "true").lower() 

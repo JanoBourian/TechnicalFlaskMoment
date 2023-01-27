@@ -61,7 +61,7 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Password security](#section12-2)
         - [Hashing Passwords with Werkzeug](#section12-3)
     - [Creating an Authentication Blueprint](#section12-4)
-    - [User Authentication Blueprint](#section12-5)
+    - [User Authentication with Flask-Login](#section12-5)
         - [Preparing the User Model for login](#section12-6)
         - [Protecting routes](#section12-7)
         - [Adding a Login Form](#section12-8)
@@ -75,7 +75,7 @@ A little approach and brief with Flask and its Features from a REST API perspect
     - [Account Confirmation](#section12-16)
         - [Generating Confirmation Tokens with itsdangerous](#section12-17)
         - [Sending Confirmation Emails](#section12-18)
-    - [Account Management]
+    - [Account Management](#section12-19)
 - [User Roles](#section13)
 - [User Profiles](#section14)
 - [Blog Posts](#section15)
@@ -139,6 +139,8 @@ flask-wtf
 python-dotenv
 flask-migrate
 flask-mail
+flask-login
+email_validator
 ```
 
 <div id="section3"></div>
@@ -1279,6 +1281,362 @@ flask run
 <div id="section12"></div>
 
 # User Authentication
+
+The most basic authentication includes the username or email, and password. 
+
+<div id="section12-1"></div>
+
+## Authentication Extensions for Flask
+
+There are many excellent Python authentication packages. Some of that packages are showed below:
+
+* Flask-Login: Management for user for logged-in users
+* Werkzeug: Password hashing and verification
+* itsdangerous: Cryptographically secure token generation and verification
+
+<div id="section12-2"></div>
+
+## Password security
+
+First and important step is: hash the password. 
+
+<div id="section12-3"></div>
+
+### Hashing Passwords with Werkzeug
+
+```python
+generate_password_hash(password, method="pbkdf2:sha256",salt_length=8)
+check_password_hash(hash, password)
+```
+
+changes:
+
+```python
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    password_hash = db.Column(db.String(128))
+    
+    @property
+    def password(self):
+        raise AttributeError("Password is not readable attribute")
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+```
+
+```python
+import unittest
+from app.models import User
+
+class UsertModelTestCase(unittest.TestCase):
+    def test_password_setter(self):
+        u = User(password = "cat")
+        self.assertTrue(u.password_hash is not None)
+    
+    def test_no_password_getter(self):
+        u = User(password = "cat2")
+        with self.assertRaises(AttributeError):
+            u.password
+    
+    def test_password_verification(self):
+        u = User(password = "cat")
+        self.assertTrue(u.verify_password("cat"))
+        self.assertFalse(u.verify_password("dog"))
+    
+    def test_password_salts_are_random(self):
+        u = User(password = "cat")
+        u2 = User(password = "cat")
+        self.assertTrue(u.password_hash != u2.password_hash)
+```
+
+<div id="section12-4"></div>
+
+## Creating an Authentication Blueprint
+
+The Blueprint has the same structure:
+
+```python
+from flask import Blueprint
+
+auth = Blueprint("auth", __name__, url_prefix="/auth")
+
+from . import views
+```
+
+<div id="section12-5"></div>
+
+## User Authentication with Flask-Login
+
+```cmd
+pip install flask-login
+```
+
+<div id="section12-6"></div>
+
+### Preparing the User Model for login
+
+Before all, we need to put some configurations for our applications models work closely with Flask-Login, and we need to know some methods or properties for that job:
+
+* is_authenticated: Must be True if the user has valid login credentials or False otherwise
+* is_active: Must de True if the user is allowed to log in or False otherwise. A False value can be used for disabled accounts. 
+* is_anonymous: Must always be False for regular users and True for a special user object that represents anonymous users. 
+* get_id(): Must return a unique identifier for the user, encoded as a Unicode string.
+
+```python
+from flask_login import UserMixin
+
+class User(UserMixin, db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64), unique=True, index=True)
+    email = db.Column(db.String(64), unique=True, index=True)
+    password_hash = db.Column(db.String(128))
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    
+    @property
+    def password(self):
+        raise AttributeError("Password is not readable attribute")
+    
+    @password.setter
+    def password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def verify_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+```
+
+Flask Login Initialization: in the main file: *app/\_\_init\_\_.py*
+
+```python
+from flask_login import LoginManager
+
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login'
+
+def create_app(config_name:str) -> Flask:
+    # ...
+    login_manager.init_app(app)
+    # ...
+```
+
+And we need a function to invoked when the extensions needs to load a user from the database given its identifier.
+
+```python
+from . import login_manager
+
+## Functions
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+```
+
+<div id="section12-7"></div>
+
+### Protecting routes
+
+Example:
+
+```python
+from flask_login import login_required
+
+@app.route("/secret")
+@login_required
+def secret():
+    return "Only authenticated users are allowed!!"
+```
+
+<div id="section12-8"></div>
+
+### Adding a Login Form
+
+```python
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired, Length, Email
+
+
+class LoginForm(FlaskForm):
+    email = StringField("Email", validators = [DataRequired(), Length(1, 64), Email()])
+    password = PasswordField("Password", validators = [DataRequired()])
+    remember_me = BooleanField("Keep me logged in")
+    submit = SubmitField("Log in")
+    ## Remember a captcha space
+
+```
+
+HTML section (remember to change the navigation bar adding the new pages)
+
+```html
+          <li class="nav-item">
+            {% if current_user.is_authenticated %}
+              <a class="nav-link active" aria-current="page" href="{{url_for('auth.logout')}}">Log Out</a>
+            {% else %}
+              <a class="nav-link active" aria-current="page" href="{{url_for('auth.login')}}">Log In</a>
+            {% endif %}
+          </li>
+```
+
+The html for the Form
+
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+Login | Login
+{% endblock %}
+
+{% block body %}
+<h1 class = "text-center mt-2">Login</h1>
+<form method="POST" class="text-center mt-4">
+    {{form.hidden_tag()}}
+    <div class="mb-3">
+        <div class="form-label">
+            {{form.email.label}}
+        </div>
+        <div class = "d-flex justify-content-center">
+            <div class="col-sm-4">
+                {{form.email(class="form-control form-control-md", placeholder="email@example.com")}}
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="form-label">
+            {{form.password.label}}
+        </div>
+        <div class = "d-flex justify-content-center">
+            <div class="col-sm-4">
+                {{form.password(class="form-control form-control-md")}}
+            </div>
+        </div>
+    </div>
+    <div class="mb-3">
+        <div class="form-check-label">
+            {{form.remember_me(class="form-check-input")}} {{form.remember_me.label}}
+        </div>
+    </div>
+    {{form.submit(class="btn btn-primary")}}
+</form>
+{% endblock %}
+```
+
+```python
+from flask import render_template, redirect, request, url_for, flash
+from flask_login import login_user
+from . import auth
+from ..models import User
+from .forms import LoginForm
+import datetime
+
+@auth.route("/login", methods=["GET", "POST"])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user is not None and user.verify_password(form.password.data):
+            login_user(user, remember =  form.remember_me.data, duration = datetime.timedelta(hours=4))
+            next_arg = request.args.get("next")
+            print(next_arg)
+            if next_arg is None or not next_arg.startswith("/"):
+                next_arg = url_for("main.index")
+            return redirect(next_arg)
+        flash("Invalid username or password")
+    return render_template("/auth/login.html", form=form)
+
+```
+
+<div id="section12-9"></div>
+
+### Signing Users in
+
+```python
+```
+
+<div id="section12-10"></div>
+
+### Signing User Out
+
+```python
+```
+
+<div id="section12-11"></div>
+
+### Understanding How Flask-Loging works
+
+```python
+```
+
+<div id="section12-12"></div>
+
+### Testing logins
+
+```python
+```
+
+<div id="section12-13"></div>
+
+## New User Registration
+
+```python
+```
+
+<div id="section12-14"></div>
+
+### Adding a User Registration Form
+
+```python
+```
+
+<div id="section12-15"></div>
+
+### Registering New Users
+
+```python
+```
+
+<div id="section12-16"></div>
+
+## Account Confirmation
+
+```python
+```
+
+<div id="section12-17"></div>
+
+### Generating Confirmation Tokens with itsdangerous
+
+```python
+```
+
+<div id="section12-18"></div>
+
+### Sending Confirmation Emails
+
+```python
+```
+
+<div id="section12-19"></div>
+
+## Account Management
+
+```python
+```
 
 <div id="section13"></div>
 
