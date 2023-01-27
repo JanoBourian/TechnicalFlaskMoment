@@ -20,8 +20,8 @@
 -->
 
 <h1>
-    {%if name %}
-        {{macros.render_awesome_title(name)}} 
+    {%if current_user.is_authenticated %}
+        {{macros.render_awesome_title(current_user.username)}} 
     {% else %}
         {{macros.render_awesome_title("Stranger")}}
     {% endif %}

@@ -1570,34 +1570,63 @@ def login():
 ### Signing User Out
 
 ```python
+@auth.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    flash("You have been logged out")
+    return redirect(url_for("main.index"))
 ```
 
 <div id="section12-11"></div>
 
 ### Understanding How Flask-Loging works
 
-```python
-```
+Please, for more information review the official documentation.
 
 <div id="section12-12"></div>
 
 ### Testing logins
 
 ```python
+flask shell
+u = User(...)
+db.session.add(u)
+db.session.commit()
 ```
 
 <div id="section12-13"></div>
 
 ## New User Registration
 
-```python
-```
-
 <div id="section12-14"></div>
 
 ### Adding a User Registration Form
 
+Changes in login template:
+
+```html
+<p>
+    New user? Please <a href="{{url_for('auth.register')}}">Click here to register</a>
+</p>
+```
+
 ```python
+class RegistrationForms(FlaskForm):
+    username = StringField("Username", validators = [DataRequired(), Regexp('^[A-Za-z][A-Za-z0-9_.]*$', 0, 'Usernames must have only letters, numbers, dots or underscores')])
+    email = StringField("Email", validators = [DataRequired(), Length(1, 64), Email()])
+    password = PasswordField("Password", validators = [DataRequired(), EqualTo('password2', message = 'Password must match.')])
+    password2 = PasswordField("Confirm password", validators = [DataRequired()])
+    # recaptcha = RecaptchaField()
+    submit = SubmitField("Register")
+    
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError("Email already registered")
+        
+    def validate_username(self, field):
+        if User.query.filter_by(username=field.data).first():
+            raise ValidationError("Username already registered")
 ```
 
 <div id="section12-15"></div>
@@ -1605,6 +1634,91 @@ def login():
 ### Registering New Users
 
 ```python
+@auth.route("/register", methods=["GET", "POST"])
+def register():
+    form = RegistrationForms()
+    if form.validate_on_submit():
+        user = User(
+            username = form.username.data,
+            email = form.email.data,
+            password = form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash("You can now login")
+        return redirect(url_for('auth.login'))
+    return render_template('auth/register.html', form=form)
+```
+
+```html
+{% extends 'base.html' %}
+
+{% block title %}
+Register | Register
+{% endblock %}
+
+{% block body %}
+
+<h1 class = "text-center mt-2">Register</h1>
+<!--
+{% if name %}
+    <h1 class = "text-center mt-2"> {{name}} </h1>
+{% endif %}
+-->
+
+<!--
+    <h1 class="text-center mt-2"> There is a Form </h1>
+    {% if name%}
+        <h1 class = "text-center mt-2"> {{name}} </h1>
+    {% else %}
+        <h1 class = "text-center mt-2"> Stranger! </h1>
+    {% endif %}
+-->
+
+    <form method="POST" class="text-center mt-4">
+        {{form.hidden_tag()}}
+        <div class="mb-3">
+            <div class="form-label">
+                {{form.username.label}}
+            </div>
+            <div class = "d-flex justify-content-center">
+                <div class="col-sm-4">
+                    {{form.username(class="form-control form-control-md", placeholder="Your username here")}}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-label">
+                {{form.email.label}}
+            </div>
+            <div class = "d-flex justify-content-center">
+                <div class="col-sm-4">
+                    {{form.email(class="form-control form-control-md", placeholder="Your email here")}}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-label">
+                {{form.password.label}}
+            </div>
+            <div class = "d-flex justify-content-center">
+                <div class="col-sm-4">
+                    {{form.password(class="form-control form-control-md", placeholder="Your password here")}}
+                </div>
+            </div>
+        </div>
+        <div class="mb-3">
+            <div class="form-label">
+                {{form.password2.label}}
+            </div>
+            <div class = "d-flex justify-content-center">
+                <div class="col-sm-4">
+                    {{form.password2(class="form-control form-control-md", placeholder="Confirm your password here")}}
+                </div>
+            </div>
+        </div>
+        {{form.submit(class="btn btn-primary")}}
+    </form>
+{% endblock %}
 ```
 
 <div id="section12-16"></div>
