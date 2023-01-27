@@ -17,6 +17,10 @@ class Config:
     FLASKY_MAIL_SENDER = os.environ.get("FLASKY_MAIL_SENDER") 
     FLASKY_ADMIN = os.environ.get("FLASKY_ADMIN") 
     SQLALCHEMY_TRACK_MODIFICATION = os.environ.get("SQLALCHEMY_TRACK_MODIFICATION") 
+    RECAPTCHA_USE_SSL = os.environ.get("RECAPTCHA_USE_SSL")
+    RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
+    RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
+    RECAPTCHA_OPTIONS = os.environ.get("RECAPTCHA_OPTIONS")
     
     @staticmethod
     def init_app(app):

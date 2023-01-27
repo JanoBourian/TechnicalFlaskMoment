@@ -1536,6 +1536,10 @@ Login | Login
 {% endblock %}
 ```
 
+<div id="section12-9"></div>
+
+### Signing Users in
+
 ```python
 from flask import render_template, redirect, request, url_for, flash
 from flask_login import login_user
@@ -1559,13 +1563,6 @@ def login():
         flash("Invalid username or password")
     return render_template("/auth/login.html", form=form)
 
-```
-
-<div id="section12-9"></div>
-
-### Signing Users in
-
-```python
 ```
 
 <div id="section12-10"></div>
