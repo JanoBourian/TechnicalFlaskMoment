@@ -1804,6 +1804,8 @@ class User(UserMixin, db.Model):
 
 ### Sending Confirmation Emails
 
+The first part is to understand correctly the way that you are generating tokens.
+
 ```python
 ```
 
